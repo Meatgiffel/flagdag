@@ -30,7 +30,7 @@ export function page({ title, body, session = null, scripts = [] }) {
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="/">
+    <a class="brand" href="/admin">
       <span class="brand-mark" aria-hidden="true">${icon("flag")}</span>
       <span>FlagPlan</span>
     </a>
@@ -69,7 +69,7 @@ export function setupAuthPage(req = null) {
       </div>
     </div>
     <p>Den offentlige del kan stadig bruges, når der findes events i databasen.</p>
-    <a class="button secondary" href="/">${icon("home")}Til forsiden</a>
+    <a class="button secondary" href="/admin">${icon("home")}Til admin</a>
   </section>`;
 }
 
@@ -106,44 +106,7 @@ export function forbiddenPage(email) {
     <p class="eyebrow">Ingen adgang</p>
     <h1>Du er logget ind, men ikke som admin</h1>
     <p>Brugeren <strong>${escapeHtml(email ?? "ukendt")}</strong> matcher ikke <code>ADMIN_USERNAME</code>.</p>
-    <a class="button secondary" href="/">${icon("home")}Til forsiden</a>
-  </section>`;
-}
-
-export function homePage({ events }) {
-  const eventLinks = events.length
-    ? `<div class="card-list">${events
-        .map(
-          (event) => `<article class="card">
-            <div>
-              <h2>${escapeHtml(event.title)}</h2>
-              <p>${event.dates.length} datoer · oprettet ${new Date(event.createdAt).toLocaleDateString("da-DK")}</p>
-            </div>
-            <a class="button secondary" href="/e/${event.publicCode}">${icon("external-link")}Se offentlig side</a>
-          </article>`,
-        )
-        .join("")}</div>`
-    : `<div class="empty-state">
-        <h2>Ingen offentlige events endnu</h2>
-        <p>Når admin har oprettet et event, kan det deles med et link.</p>
-      </div>`;
-
-  return `<section class="hero">
-    <div class="hero-copy">
-      <p class="eyebrow">Flagdage uden besvær</p>
-      <h1>Hold styr på ture, chauffører og hjælpere.</h1>
-      <p>Admin opretter et event med datoer og tider. Frivillige bruger et delt link og melder sig på uden login.</p>
-      <div class="actions">
-        <a class="button" href="/admin">${icon("log-in")}Admin</a>
-      </div>
-    </div>
-  </section>
-  <section class="section flow">
-    <div class="section-heading">
-      <p class="eyebrow">Events</p>
-      <h2>Offentlige links</h2>
-    </div>
-    ${eventLinks}
+    <a class="button secondary" href="/admin">${icon("home")}Til admin</a>
   </section>`;
 }
 
@@ -512,7 +475,7 @@ export function notFoundPage() {
     body: `<section class="narrow flow">
       <p class="eyebrow">404</p>
       <h1>Siden findes ikke</h1>
-      <a class="button secondary" href="/">${icon("home")}Til forsiden</a>
+      <a class="button secondary" href="/admin">${icon("home")}Til admin</a>
     </section>`,
   });
 }

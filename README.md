@@ -24,7 +24,7 @@ En lille Node.js-app til at oprette flagdags-events og lade frivillige melde sig
    npm run dev
    ```
 
-5. Åbn `http://localhost:3000`.
+5. Åbn `http://localhost:3000/admin`.
 
 Du kan oprette et demo-event til test uden admin-login:
 
@@ -33,6 +33,7 @@ npm run demo
 ```
 
 Demo-linket vises i terminalen og får en tilfældig offentlig kode, fx `http://localhost:3000/e/7k4mx9qp`.
+Der findes ingen offentlig event-oversigt på forsiden; frivillige skal have et direkte event-link.
 
 ## Admin-login
 

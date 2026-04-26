@@ -7,7 +7,6 @@ import {
   adminDashboard,
   adminEventPage,
   adminLoginPage,
-  homePage,
   newEventPage,
   notFoundPage,
   page,
@@ -26,18 +25,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static("src/public", { maxAge: 0 }));
 mountAuth(app);
 
-app.get("/", async (_req, res, next) => {
-  try {
-    const events = await prisma.event.findMany({
-      orderBy: { createdAt: "desc" },
-      include: { dates: true },
-      take: 12,
-    });
-
-    res.send(page({ title: "Forside", body: homePage({ events }) }));
-  } catch (error) {
-    next(error);
-  }
+app.get("/", (_req, res) => {
+  res.redirect("/admin");
 });
 
 app.get("/admin/login", async (req, res, next) => {
@@ -366,7 +355,7 @@ app.use((error, _req, res, _next) => {
         <p class="eyebrow">Fejl</p>
         <h1>Noget gik galt</h1>
         <p>Prøv igen om lidt.</p>
-        <a class="button secondary" href="/">Til forsiden</a>
+        <a class="button secondary" href="/admin">Til admin</a>
       </section>`,
     }),
   );
