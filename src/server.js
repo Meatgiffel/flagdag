@@ -20,7 +20,7 @@ import { eventFormSchema, normalizeTripIds, parseDates, signupSchema } from "./l
 const app = express();
 const port = Number(process.env.PORT ?? 3000);
 
-app.set("trust proxy", true);
+app.set("trust proxy", process.env.TRUST_PROXY === "true" || process.env.TRUST_PROXY === "1" ? 1 : false);
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static("src/public", { maxAge: 0 }));
 mountAuth(app);

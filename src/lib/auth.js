@@ -4,6 +4,10 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { page, setupAuthPage, forbiddenPage } from "./render.js";
 
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const LOGIN_MAX_ATTEMPTS = 10;
+const failedLoginAttempts = new Map();
+
 export function adminUsername() {
   return (process.env.ADMIN_USERNAME ?? "admin").trim();
 }
@@ -77,16 +81,29 @@ export function mountAuth(app) {
       return;
     }
 
+    const rateLimit = loginRateLimit(req);
+    if (rateLimit.limited) {
+      res.set("Retry-After", String(rateLimit.retryAfterSeconds));
+      res.status(429).send(loginRateLimitPage(rateLimit.retryAfterSeconds));
+      return;
+    }
+
     passport.authenticate("local", (error, user) => {
       if (error) return next(error);
       if (!user) {
+        registerFailedLogin(req);
         res.redirect("/admin/login?error=1");
         return;
       }
 
-      req.logIn(user, (loginError) => {
-        if (loginError) return next(loginError);
-        res.redirect("/admin");
+      req.session.regenerate((sessionError) => {
+        if (sessionError) return next(sessionError);
+
+        req.logIn(user, (loginError) => {
+          if (loginError) return next(loginError);
+          clearFailedLogins(req);
+          res.redirect("/admin");
+        });
       });
     })(req, res, next);
   });
@@ -97,7 +114,7 @@ export function mountAuth(app) {
 
       req.session.destroy((destroyError) => {
         if (destroyError) return next(destroyError);
-        res.clearCookie("flagplan.sid");
+        res.clearCookie("flagplan.sid", { path: "/" });
         res.redirect("/");
       });
     });
@@ -129,4 +146,61 @@ export async function requireAdmin(req, res, next) {
 
   res.locals.session = session;
   next();
+}
+
+function loginRateLimit(req) {
+  cleanupLoginAttempts();
+
+  const attempt = failedLoginAttempts.get(loginRateKey(req));
+  if (!attempt || attempt.resetAt <= Date.now() || attempt.count < LOGIN_MAX_ATTEMPTS) {
+    return { limited: false, retryAfterSeconds: 0 };
+  }
+
+  return {
+    limited: true,
+    retryAfterSeconds: Math.max(1, Math.ceil((attempt.resetAt - Date.now()) / 1000)),
+  };
+}
+
+function registerFailedLogin(req) {
+  const key = loginRateKey(req);
+  const now = Date.now();
+  const attempt = failedLoginAttempts.get(key);
+
+  if (!attempt || attempt.resetAt <= now) {
+    failedLoginAttempts.set(key, { count: 1, resetAt: now + LOGIN_WINDOW_MS });
+    return;
+  }
+
+  attempt.count += 1;
+  failedLoginAttempts.set(key, attempt);
+}
+
+function clearFailedLogins(req) {
+  failedLoginAttempts.delete(loginRateKey(req));
+}
+
+function loginRateKey(req) {
+  return req.ip || req.socket?.remoteAddress || "unknown";
+}
+
+function cleanupLoginAttempts() {
+  const now = Date.now();
+  for (const [key, attempt] of failedLoginAttempts.entries()) {
+    if (attempt.resetAt <= now) failedLoginAttempts.delete(key);
+  }
+}
+
+function loginRateLimitPage(retryAfterSeconds) {
+  const minutes = Math.max(1, Math.ceil(retryAfterSeconds / 60));
+
+  return page({
+    title: "For mange loginforsøg",
+    body: `<section class="narrow flow">
+      <p class="eyebrow">Admin-login</p>
+      <h1>For mange loginforsøg</h1>
+      <p>Vent cirka ${minutes} minutter, og prøv igen.</p>
+      <a class="button secondary" href="/admin/login">Til login</a>
+    </section>`,
+  });
 }

@@ -58,3 +58,5 @@ Brug ikke et fælles standard-password i produktion. `SESSION_SECRET` skal være
 ## Hosting
 
 Appen kan hostes som en almindelig Node.js-proces med SQLite-filen ved siden af appen. Sørg for backup af SQLite-filen, og brug en fast hemmelig `SESSION_SECRET` i produktion.
+
+Hvis appen gøres tilgængelig på internettet, bør den ligge bag HTTPS, fx via Nginx eller Caddy. Sæt kun `TRUST_PROXY=true`, når appen faktisk står bag en betroet reverse proxy.
