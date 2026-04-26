@@ -84,7 +84,6 @@ export function adminLoginPage({ error = "", session = null, username = "admin" 
     body: `<section class="narrow flow">
       <p class="eyebrow">Admin-login</p>
       <h1>Log ind som admin</h1>
-      <p>Brug det lokale admin-login fra <code>.env</code>.</p>
       ${errorNotice}
       <form class="panel form-grid" method="post" action="/admin/login">
         <label>
