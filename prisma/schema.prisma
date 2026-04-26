@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Event {
+  id          String      @id @default(cuid())
+  publicCode  String      @unique
+  title       String
+  morningTime String
+  eveningTime String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  dates       EventDate[]
+  trips       Trip[]
+}
+
+model EventDate {
+  id      String @id @default(cuid())
+  eventId String
+  dateKey String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  trips   Trip[]
+
+  @@unique([eventId, dateKey])
+  @@index([dateKey])
+}
+
+model Trip {
+  id          String   @id @default(cuid())
+  eventId     String
+  eventDateId String
+  dateKey     String
+  kind        String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventDate   EventDate @relation(fields: [eventDateId], references: [id], onDelete: Cascade)
+  signups     Signup[]
+
+  @@unique([eventDateId, kind])
+  @@index([eventId, dateKey])
+}
+
+model Signup {
+  id           String   @id @default(cuid())
+  tripId       String
+  role         String
+  slotNumber   Int
+  firstName    String
+  lastName     String?
+  phone        String?
+  email        String?
+  ownerKeyHash String?
+  createdAt    DateTime @default(now())
+  trip         Trip     @relation(fields: [tripId], references: [id], onDelete: Cascade)
+
+  @@unique([tripId, role, slotNumber])
+  @@index([tripId, role])
+  @@index([ownerKeyHash])
+}
