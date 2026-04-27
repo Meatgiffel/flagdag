@@ -180,11 +180,11 @@ export function adminPasswordPage({ session, error = "", success = false }) {
         </label>
         <label>
           <span>Nyt password</span>
-          <input type="password" name="newPassword" autocomplete="new-password" minlength="12" required>
+          <input type="password" name="newPassword" autocomplete="new-password" minlength="8" required>
         </label>
         <label>
           <span>Gentag nyt password</span>
-          <input type="password" name="confirmPassword" autocomplete="new-password" minlength="12" required>
+          <input type="password" name="confirmPassword" autocomplete="new-password" minlength="8" required>
         </label>
         <p class="muted">Efter skiftet bliver du logget ud og skal logge ind igen med det nye password.</p>
         <div class="form-actions">

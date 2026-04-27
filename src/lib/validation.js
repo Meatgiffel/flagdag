@@ -13,7 +13,7 @@ export const eventFormSchema = z.object({
 export const passwordChangeSchema = z
   .object({
     currentPassword: z.string().min(1),
-    newPassword: z.string().min(12, "Det nye password skal være mindst 12 tegn.").max(200),
+    newPassword: z.string().min(8, "Det nye password skal være mindst 8 tegn.").max(200),
     confirmPassword: z.string().min(1),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
