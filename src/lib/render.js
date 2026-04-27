@@ -14,7 +14,7 @@ import {
 } from "./format.js";
 import { icon } from "./icons.js";
 
-const ASSET_VERSION = "12";
+const ASSET_VERSION = "13";
 
 export function page({ title, body, session = null, scripts = [] }) {
   const scriptTags = scripts.map((src) => `<script src="${assetUrl(src)}" defer></script>`).join("");

@@ -519,9 +519,9 @@ fieldset {
 .public-day-block {
   overflow: hidden;
   margin-top: 1.35rem;
-  border: 1px solid #c6d3cc;
+  border: 0;
   border-radius: var(--radius);
-  background: #edf3ef;
+  background: transparent;
   box-shadow: 0 14px 34px rgb(31 42 40 / 0.07);
 }
 
@@ -553,17 +553,21 @@ fieldset {
 
 .public-day-block .day-heading {
   margin-bottom: 0;
-  border-bottom: 1px solid #c6d3cc;
+  border-bottom: 0;
 }
 
 .public-day-block .day-date {
   width: 100%;
   min-width: 0;
-  border-radius: 0;
+  border-radius: var(--radius) var(--radius) 0 0;
 }
 
 .day-trips {
   padding: 0.85rem;
+  border: 1px solid #c6d3cc;
+  border-top: 0;
+  border-radius: 0 0 var(--radius) var(--radius);
+  background: #edf3ef;
 }
 
 .day-number {
