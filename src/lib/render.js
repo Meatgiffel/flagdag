@@ -14,7 +14,7 @@ import {
 } from "./format.js";
 import { icon } from "./icons.js";
 
-const ASSET_VERSION = "11";
+const ASSET_VERSION = "12";
 
 export function page({ title, body, session = null, scripts = [] }) {
   const scriptTags = scripts.map((src) => `<script src="${assetUrl(src)}" defer></script>`).join("");
@@ -342,9 +342,11 @@ export function publicEventPage({ event, req, error = "", success = false, remov
   const daySections = [...grouped.entries()]
     .map(([dateKey, trips]) => {
       const cards = trips.map((trip) => publicTripCard(trip)).join("");
-      return `<section class="day-block">
+      return `<section class="day-block public-day-block">
         ${publicDayHeading(dateKey, trips)}
-        <div class="trip-grid">${cards}</div>
+        <div class="day-trips">
+          <div class="trip-grid">${cards}</div>
+        </div>
       </section>`;
     })
     .join("");

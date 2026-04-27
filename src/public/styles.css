@@ -516,6 +516,15 @@ fieldset {
   margin-top: 2rem;
 }
 
+.public-day-block {
+  overflow: hidden;
+  margin-top: 1.35rem;
+  border: 1px solid #c6d3cc;
+  border-radius: var(--radius);
+  background: #edf3ef;
+  box-shadow: 0 14px 34px rgb(31 42 40 / 0.07);
+}
+
 .day-block > h2 {
   margin-bottom: 0.8rem;
   text-transform: capitalize;
@@ -540,6 +549,21 @@ fieldset {
   border-radius: 7px 7px 0 0;
   background: var(--primary);
   color: #ffffff;
+}
+
+.public-day-block .day-heading {
+  margin-bottom: 0;
+  border-bottom: 1px solid #c6d3cc;
+}
+
+.public-day-block .day-date {
+  width: 100%;
+  min-width: 0;
+  border-radius: 0;
+}
+
+.day-trips {
+  padding: 0.85rem;
 }
 
 .day-number {
@@ -572,6 +596,15 @@ fieldset {
 
 .trip-card {
   padding: 1rem;
+}
+
+.public-day-block .trip-grid {
+  gap: 0.75rem;
+}
+
+.public-day-block .trip-card {
+  border-color: #d1dad4;
+  box-shadow: none;
 }
 
 .trip-card-head {
@@ -893,6 +926,10 @@ fieldset {
     margin-top: 1.7rem;
   }
 
+  .public-day-block {
+    margin-top: 1rem;
+  }
+
   .day-heading {
     border-bottom-width: 2px;
   }
@@ -900,6 +937,10 @@ fieldset {
   .day-date {
     min-width: 0;
     padding: 0.7rem 0.85rem;
+  }
+
+  .day-trips {
+    padding: 0.65rem;
   }
 
   .day-number {
