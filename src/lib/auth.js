@@ -1,3 +1,6 @@
+import { createHash } from "node:crypto";
+import { promises as fs } from "node:fs";
+import path from "node:path";
 import bcrypt from "bcryptjs";
 import session from "express-session";
 import passport from "passport";
@@ -57,6 +60,7 @@ export function mountAuth(app) {
           id: "admin",
           username: adminUsername(),
           email: adminUsername(),
+          passwordVersion: adminPasswordVersion(),
         });
       } catch (error) {
         return done(error);
@@ -123,6 +127,7 @@ export function mountAuth(app) {
 
 export async function getAdminSession(req) {
   if (!authIsConfigured() || !req.isAuthenticated?.() || !req.user) return null;
+  if (req.user.passwordVersion !== adminPasswordVersion()) return null;
   return { user: req.user };
 }
 
@@ -146,6 +151,25 @@ export async function requireAdmin(req, res, next) {
 
   res.locals.session = session;
   next();
+}
+
+export async function verifyAdminPassword(password) {
+  if (!authIsConfigured()) return false;
+  return bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH);
+}
+
+export async function updateAdminPassword(password) {
+  const passwordHash = await bcrypt.hash(password, 12);
+  const envPath = path.resolve(process.cwd(), process.env.ENV_FILE || ".env");
+  const envContent = await fs.readFile(envPath, "utf8");
+  const nextEnvContent = setEnvValue(envContent, "ADMIN_PASSWORD_HASH", passwordHash);
+  const tempPath = `${envPath}.${process.pid}.tmp`;
+
+  await fs.writeFile(tempPath, nextEnvContent, { mode: 0o600 });
+  await fs.rename(tempPath, envPath);
+
+  process.env.ADMIN_PASSWORD_HASH = passwordHash;
+  return passwordHash;
 }
 
 function loginRateLimit(req) {
@@ -203,4 +227,24 @@ function loginRateLimitPage(retryAfterSeconds) {
       <a class="button secondary" href="/admin/login">Til login</a>
     </section>`,
   });
+}
+
+function adminPasswordVersion() {
+  return createHash("sha256").update(process.env.ADMIN_PASSWORD_HASH ?? "").digest("hex");
+}
+
+function setEnvValue(content, key, value) {
+  const line = `${key}=${quoteEnvValue(value)}`;
+  const pattern = new RegExp(`^${key}=.*$`, "m");
+
+  if (pattern.test(content)) {
+    return content.replace(pattern, line);
+  }
+
+  const suffix = content.endsWith("\n") ? "" : "\n";
+  return `${content}${suffix}${line}\n`;
+}
+
+function quoteEnvValue(value) {
+  return `"${String(value).replaceAll("\\", "\\\\").replaceAll('"', '\\"')}"`;
 }

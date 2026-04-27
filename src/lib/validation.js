@@ -10,6 +10,21 @@ export const eventFormSchema = z.object({
   dates: z.string().min(1),
 });
 
+export const passwordChangeSchema = z
+  .object({
+    currentPassword: z.string().min(1),
+    newPassword: z.string().min(12, "Det nye password skal være mindst 12 tegn.").max(200),
+    confirmPassword: z.string().min(1),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "De to nye passwords er ikke ens.",
+    path: ["confirmPassword"],
+  })
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: "Det nye password skal være anderledes end det nuværende.",
+    path: ["newPassword"],
+  });
+
 export const signupSchema = z
   .object({
     firstName: z.string().trim().min(1).max(50),

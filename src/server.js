@@ -2,11 +2,20 @@ import "dotenv/config";
 import { createHash } from "node:crypto";
 import express from "express";
 import { prisma } from "./lib/db.js";
-import { adminUsername, authIsConfigured, getAdminSession, mountAuth, requireAdmin } from "./lib/auth.js";
+import {
+  adminUsername,
+  authIsConfigured,
+  getAdminSession,
+  mountAuth,
+  requireAdmin,
+  updateAdminPassword,
+  verifyAdminPassword,
+} from "./lib/auth.js";
 import {
   adminDashboard,
   adminEventPage,
   adminLoginPage,
+  adminPasswordPage,
   newEventPage,
   notFoundPage,
   page,
@@ -15,7 +24,13 @@ import {
 } from "./lib/render.js";
 import { ROLE_LIMITS, publicOrigin, sortTrips } from "./lib/format.js";
 import { generateUniquePublicCode } from "./lib/public-code.js";
-import { eventFormSchema, normalizeTripIds, parseDates, signupSchema } from "./lib/validation.js";
+import {
+  eventFormSchema,
+  normalizeTripIds,
+  parseDates,
+  passwordChangeSchema,
+  signupSchema,
+} from "./lib/validation.js";
 
 const app = express();
 const port = Number(process.env.PORT ?? 3000);
@@ -44,6 +59,7 @@ app.get("/admin/login", async (req, res, next) => {
 
     res.send(
       adminLoginPage({
+        changed: req.query.changed === "1",
         error: req.query.error,
         username: adminUsername(),
       }),
@@ -61,6 +77,52 @@ app.get("/admin", requireAdmin, async (_req, res, next) => {
     });
 
     res.send(adminDashboard({ events, session: res.locals.session }));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/admin/password", requireAdmin, (req, res) => {
+  res.send(adminPasswordPage({ session: res.locals.session }));
+});
+
+app.post("/admin/password", requireAdmin, async (req, res, next) => {
+  const parsed = passwordChangeSchema.safeParse(req.body);
+
+  if (!parsed.success) {
+    res.status(400).send(
+      adminPasswordPage({
+        session: res.locals.session,
+        error: parsed.error.issues[0]?.message ?? "Udfyld alle felter.",
+      }),
+    );
+    return;
+  }
+
+  try {
+    const currentPasswordMatches = await verifyAdminPassword(parsed.data.currentPassword);
+
+    if (!currentPasswordMatches) {
+      res.status(400).send(
+        adminPasswordPage({
+          session: res.locals.session,
+          error: "Det nuværende password er ikke korrekt.",
+        }),
+      );
+      return;
+    }
+
+    await updateAdminPassword(parsed.data.newPassword);
+
+    req.logout((logoutError) => {
+      if (logoutError) return next(logoutError);
+
+      req.session.destroy((destroyError) => {
+        if (destroyError) return next(destroyError);
+        res.clearCookie("flagplan.sid", { path: "/" });
+        res.redirect("/admin/login?changed=1");
+      });
+    });
   } catch (error) {
     next(error);
   }

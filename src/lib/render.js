@@ -73,9 +73,12 @@ export function setupAuthPage(req = null) {
   </section>`;
 }
 
-export function adminLoginPage({ error = "", session = null, username = "admin" }) {
+export function adminLoginPage({ error = "", changed = false, session = null, username = "admin" }) {
   const errorNotice = error
     ? `<div class="notice error">Login blev afvist. Tjek brugernavn og password.</div>`
+    : "";
+  const changedNotice = changed
+    ? `<div class="notice success">Passwordet er skiftet. Log ind med det nye password.</div>`
     : "";
 
   return page({
@@ -84,6 +87,7 @@ export function adminLoginPage({ error = "", session = null, username = "admin" 
     body: `<section class="narrow flow">
       <p class="eyebrow">Admin-login</p>
       <h1>Log ind som admin</h1>
+      ${changedNotice}
       ${errorNotice}
       <form class="panel form-grid" method="post" action="/admin/login">
         <label>
@@ -136,6 +140,7 @@ export function adminDashboard({ events, session }) {
           <h1>Events</h1>
         </div>
         <a class="button" href="/admin/events/new">${icon("calendar-plus")}Opret event</a>
+        <a class="button secondary" href="/admin/password">${icon("key-round")}Skift password</a>
       </div>
       <div class="table-wrap">
         <table>
@@ -150,6 +155,42 @@ export function adminDashboard({ events, session }) {
           <tbody>${rows}</tbody>
         </table>
       </div>
+    </section>`,
+  });
+}
+
+export function adminPasswordPage({ session, error = "", success = false }) {
+  return page({
+    title: "Skift password",
+    session,
+    body: `<section class="narrow flow">
+      <div class="toolbar">
+        <div>
+          <p class="eyebrow">Admin</p>
+          <h1>Skift password</h1>
+        </div>
+        <a class="button secondary" href="/admin">${icon("arrow-left")}Tilbage</a>
+      </div>
+      ${error ? `<div class="notice error">${escapeHtml(error)}</div>` : ""}
+      ${success ? `<div class="notice success">Passwordet er skiftet.</div>` : ""}
+      <form class="panel form-grid" method="post" action="/admin/password">
+        <label>
+          <span>Nuværende password</span>
+          <input type="password" name="currentPassword" autocomplete="current-password" required autofocus>
+        </label>
+        <label>
+          <span>Nyt password</span>
+          <input type="password" name="newPassword" autocomplete="new-password" minlength="12" required>
+        </label>
+        <label>
+          <span>Gentag nyt password</span>
+          <input type="password" name="confirmPassword" autocomplete="new-password" minlength="12" required>
+        </label>
+        <p class="muted">Efter skiftet bliver du logget ud og skal logge ind igen med det nye password.</p>
+        <div class="form-actions">
+          <button class="button" type="submit">${icon("save")}Skift password</button>
+        </div>
+      </form>
     </section>`,
   });
 }
