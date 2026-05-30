@@ -1,5 +1,7 @@
 import "dotenv/config";
 import { createHash } from "node:crypto";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
 import express from "express";
 import { prisma } from "./lib/db.js";
 import {
@@ -32,7 +34,7 @@ import {
   signupSchema,
 } from "./lib/validation.js";
 
-const app = express();
+export const app = express();
 const port = Number(process.env.PORT ?? 3000);
 
 app.set("trust proxy", process.env.TRUST_PROXY === "true" || process.env.TRUST_PROXY === "1" ? 1 : false);
@@ -423,9 +425,11 @@ app.use((error, _req, res, _next) => {
   );
 });
 
-app.listen(port, () => {
-  console.log(`FlagPlan kører på http://localhost:${port}`);
-});
+if (isDirectRun()) {
+  app.listen(port, () => {
+    console.log(`FlagPlan kører på http://localhost:${port}`);
+  });
+}
 
 async function findPublicEvent(publicCode) {
   const event = await prisma.event.findUnique({
@@ -494,4 +498,8 @@ async function reserveSignupSlot(tx, data) {
 
 function hashOwnerKey(ownerKey) {
   return createHash("sha256").update(ownerKey).digest("hex");
+}
+
+function isDirectRun() {
+  return Boolean(process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href);
 }

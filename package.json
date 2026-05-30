@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
+    "test": "node --no-warnings --test",
     "db:generate": "prisma generate",
     "db:migrate": "node --no-warnings scripts/setup-db.js && prisma generate",
     "db:setup": "node --no-warnings scripts/setup-db.js && prisma generate",
