@@ -32,7 +32,7 @@ export const signupSchema = z
     phone: z.string().trim().max(40).optional().default(""),
     email: z.string().trim().max(120).optional().default(""),
     ownerKey: z.string().trim().max(160).optional().default(""),
-    role: z.enum(["DRIVER", "HELPER", "DRIVER_RESERVE", "HELPER_RESERVE"]),
+    role: z.enum(["DRIVER", "HELPER"]),
     tripIds: z.array(z.string().min(1)).min(1),
     company: z.string().optional().default(""),
   })

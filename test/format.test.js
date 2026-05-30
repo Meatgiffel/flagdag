@@ -62,30 +62,14 @@ test("tripCounts and tripStatus report open, almost full, and full trips", () =>
       { role: "DRIVER" },
       { role: "HELPER" },
       { role: "HELPER" },
-      { role: "DRIVER_RESERVE" },
-      { role: "HELPER_RESERVE" },
     ],
   };
 
   assert.deepEqual(tripCounts(fullTrip), {
     DRIVER: ROLE_LIMITS.DRIVER,
     HELPER: ROLE_LIMITS.HELPER,
-    DRIVER_RESERVE: 1,
-    HELPER_RESERVE: 1,
   });
   assert.equal(tripStatus(emptyTrip).tone, "open");
   assert.equal(tripStatus(almostFullTrip).tone, "almost");
   assert.equal(tripStatus(fullTrip).tone, "full");
-});
-
-test("reserve signups do not affect active trip status", () => {
-  const reserveOnlyTrip = {
-    signups: [
-      { role: "DRIVER_RESERVE" },
-      { role: "HELPER_RESERVE" },
-    ],
-  };
-
-  assert.deepEqual(tripCounts(reserveOnlyTrip), { DRIVER: 0, HELPER: 0, DRIVER_RESERVE: 1, HELPER_RESERVE: 1 });
-  assert.equal(tripStatus(reserveOnlyTrip).tone, "open");
 });

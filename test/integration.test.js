@@ -105,7 +105,7 @@ test("public signup stores volunteers, keeps contact data private, and enforces 
     tripIds: morningTrip.id,
     ownerKey: "owner-lin",
   });
-  const reserve = await postForm(`/e/${event.publicCode}/signup`, {
+  const unsupportedRole = await postForm(`/e/${event.publicCode}/signup`, {
     firstName: "Lin",
     phone: "22222222",
     role: "HELPER_RESERVE",
@@ -117,7 +117,7 @@ test("public signup stores volunteers, keeps contact data private, and enforces 
   assert.equal(first.headers.get("location"), `/e/${event.publicCode}?tak=1`);
   assert.equal(second.status, 302);
   assert.equal(overCapacity.status, 409);
-  assert.equal(reserve.status, 302);
+  assert.equal(unsupportedRole.status, 400);
 
   const helperSignups = await prisma.signup.findMany({
     where: {
@@ -136,106 +136,17 @@ test("public signup stores volunteers, keeps contact data private, and enforces 
       ["Grace", 2],
     ],
   );
-  const reserveSignup = await prisma.signup.findFirstOrThrow({
-    where: {
-      tripId: morningTrip.id,
-      role: "HELPER_RESERVE",
-    },
-  });
-  assert.equal(reserveSignup.firstName, "Lin");
-  assert.equal(reserveSignup.slotNumber, 1);
-
   const publicPage = await fetch(`${baseUrl}/e/${event.publicCode}`);
   const html = await publicPage.text();
 
   assert.equal(publicPage.status, 200);
   assert.match(html, /Ada/);
   assert.match(html, /Grace/);
-  assert.match(html, /Lin/);
-  assert.match(html, /Reservehjælper \(ikke aktiv\)/);
-  assert.match(html, /Hjælpere fyldt 2\/2 - skriv dig som backup/);
-  assert.match(html, /data-role="HELPER_RESERVE"/);
-  assert.doesNotMatch(html, /Reservechauffør \(ikke aktiv\)/);
-  assert.doesNotMatch(html, /Chauffør fyldt 1\/1 - skriv dig som backup/);
+  assert.doesNotMatch(html, /Lin/);
+  assert.doesNotMatch(html, /HELPER_RESERVE/);
   assert.doesNotMatch(html, /11111111/);
   assert.doesNotMatch(html, /grace@example\.test/);
   assert.doesNotMatch(html, /22222222/);
-});
-
-test("reserve signup is only allowed when the matching active role is full", async () => {
-  const event = await createEvent();
-  const morningTrip = event.trips.find((trip) => trip.kind === "MORNING");
-
-  const earlyDriverReserve = await postForm(`/e/${event.publicCode}/signup`, {
-    firstName: "Ada",
-    phone: "11111111",
-    role: "DRIVER_RESERVE",
-    tripIds: morningTrip.id,
-    ownerKey: "owner-ada",
-  });
-  const earlyHelperReserve = await postForm(`/e/${event.publicCode}/signup`, {
-    firstName: "Grace",
-    phone: "22222222",
-    role: "HELPER_RESERVE",
-    tripIds: morningTrip.id,
-    ownerKey: "owner-grace",
-  });
-
-  assert.equal(earlyDriverReserve.status, 409);
-  assert.equal(earlyHelperReserve.status, 409);
-
-  await postForm(`/e/${event.publicCode}/signup`, {
-    firstName: "Driver",
-    phone: "33333333",
-    role: "DRIVER",
-    tripIds: morningTrip.id,
-    ownerKey: "owner-driver",
-  });
-  await postForm(`/e/${event.publicCode}/signup`, {
-    firstName: "Helper One",
-    phone: "44444444",
-    role: "HELPER",
-    tripIds: morningTrip.id,
-    ownerKey: "owner-helper-one",
-  });
-
-  const driverReserve = await postForm(`/e/${event.publicCode}/signup`, {
-    firstName: "Driver Reserve",
-    phone: "55555555",
-    role: "DRIVER_RESERVE",
-    tripIds: morningTrip.id,
-    ownerKey: "owner-driver-reserve",
-  });
-  const stillEarlyHelperReserve = await postForm(`/e/${event.publicCode}/signup`, {
-    firstName: "Helper Reserve",
-    phone: "66666666",
-    role: "HELPER_RESERVE",
-    tripIds: morningTrip.id,
-    ownerKey: "owner-helper-reserve",
-  });
-
-  assert.equal(driverReserve.status, 302);
-  assert.equal(stillEarlyHelperReserve.status, 409);
-
-  await postForm(`/e/${event.publicCode}/signup`, {
-    firstName: "Helper Two",
-    phone: "77777777",
-    role: "HELPER",
-    tripIds: morningTrip.id,
-    ownerKey: "owner-helper-two",
-  });
-
-  const helperReserve = await postForm(`/e/${event.publicCode}/signup`, {
-    firstName: "Helper Reserve",
-    phone: "66666666",
-    role: "HELPER_RESERVE",
-    tripIds: morningTrip.id,
-    ownerKey: "owner-helper-reserve",
-  });
-
-  assert.equal(helperReserve.status, 302);
-  assert.equal(await prisma.signup.count({ where: { tripId: morningTrip.id, role: "DRIVER_RESERVE" } }), 1);
-  assert.equal(await prisma.signup.count({ where: { tripId: morningTrip.id, role: "HELPER_RESERVE" } }), 1);
 });
 
 test("public signup rejects trips from another event", async () => {

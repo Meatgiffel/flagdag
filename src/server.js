@@ -24,7 +24,7 @@ import {
   publicEventPage,
   setupAuthPage,
 } from "./lib/render.js";
-import { ROLE_LABELS, ROLE_LIMITS, publicOrigin, sortTrips } from "./lib/format.js";
+import { ROLE_LIMITS, publicOrigin, sortTrips } from "./lib/format.js";
 import { generateUniquePublicCode } from "./lib/public-code.js";
 import {
   eventFormSchema,
@@ -311,7 +311,7 @@ app.post("/e/:code/signup", async (req, res, next) => {
 
     await prisma.$transaction(async (tx) => {
       for (const tripId of selectedTripIds) {
-        await reserveSignupSlot(tx, {
+        await allocateSignupSlot(tx, {
           tripId,
           role: parsed.data.role,
           firstName: parsed.data.firstName,
@@ -475,30 +475,11 @@ async function findEventForAdmin(id) {
 
 class SignupCapacityError extends Error {}
 
-async function reserveSignupSlot(tx, data) {
+async function allocateSignupSlot(tx, data) {
   const limit = ROLE_LIMITS[data.role];
-  const reserveForRole = reserveRoleTarget(data.role);
+  if (!limit) throw new SignupCapacityError("Vælg enten chauffør eller hjælper.");
 
-  if (!limit && !reserveForRole) {
-    throw new SignupCapacityError("Vælg enten chauffør, hjælper eller reserve.");
-  }
-
-  if (reserveForRole) {
-    const activeCount = await tx.signup.count({
-      where: {
-        tripId: data.tripId,
-        role: reserveForRole,
-      },
-    });
-
-    if (activeCount < ROLE_LIMITS[reserveForRole]) {
-      throw new SignupCapacityError(`${ROLE_LABELS[data.role]} er først mulig, når ${ROLE_LABELS[reserveForRole].toLowerCase()} er fyldt.`);
-    }
-  }
-
-  const slotLimit = limit ?? 1000;
-
-  for (let slotNumber = 1; slotNumber <= slotLimit; slotNumber += 1) {
+  for (let slotNumber = 1; slotNumber <= limit; slotNumber += 1) {
     try {
       await tx.signup.create({
         data: {
@@ -512,17 +493,11 @@ async function reserveSignupSlot(tx, data) {
     }
   }
 
-  throw new SignupCapacityError(`${ROLE_LABELS[data.role] ?? "Den valgte rolle"} er allerede fyldt på en af turene.`);
+  throw new SignupCapacityError("Den valgte rolle er allerede fyldt på en af turene.");
 }
 
 function hashOwnerKey(ownerKey) {
   return createHash("sha256").update(ownerKey).digest("hex");
-}
-
-function reserveRoleTarget(role) {
-  if (role === "DRIVER_RESERVE") return "DRIVER";
-  if (role === "HELPER_RESERVE") return "HELPER";
-  return null;
 }
 
 function isDirectRun() {
