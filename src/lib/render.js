@@ -442,26 +442,35 @@ function activeSlotButton({ trip, role, text, count, reserveCount, limit, label 
   if (!full) return slotButton({ trip, role, text, count, limit, label });
 
   const reserveRole = role === "DRIVER" ? "DRIVER_RESERVE" : "HELPER_RESERVE";
-  const reserveText = role === "DRIVER" ? "Reservechauffør (ikke aktiv)" : "Reservehjælper (ikke aktiv)";
-  return `${slotButton({ trip, role, text, count, limit, label })}
-      ${slotButton({ trip, role: reserveRole, text: reserveText, count: reserveCount, limit: null, label })}`;
+  const reserveText = role === "DRIVER" ? "Chauffør fyldt 1/1 - skriv dig som backup" : "Hjælpere fyldt 2/2 - skriv dig som backup";
+
+  return slotButton({
+    trip,
+    role: reserveRole,
+    text: reserveText,
+    count: reserveCount,
+    limit: null,
+    label,
+    modalRoleLabel: ROLE_LABELS[reserveRole],
+    tone: "backup",
+  });
 }
 
-function slotButton({ trip, role, text, count, limit, label }) {
+function slotButton({ trip, role, text, count, limit, label, modalRoleLabel = text, tone = "" }) {
   const full = limit !== null && count >= limit;
   const countLabel = limit === null ? "" : ` ${count}/${limit}`;
   return `<button
-    class="slot-button ${full ? "full" : ""}"
+    class="slot-button ${full ? "full" : ""} ${tone}"
     type="button"
     ${full ? "disabled" : ""}
     data-signup-trigger
     data-trip-id="${trip.id}"
     data-role="${role}"
-    data-role-label="${escapeHtml(text)}"
+    data-role-label="${escapeHtml(modalRoleLabel)}"
     data-trip-label="${escapeHtml(label)}"
-    aria-label="Meld dig som ${escapeHtml(text.toLowerCase())} på ${escapeHtml(label)}"
+    aria-label="Meld dig som ${escapeHtml(modalRoleLabel.toLowerCase())} på ${escapeHtml(label)}"
   >
-    <span class="slot-icon">${icon(full ? "check" : "plus")}</span>
+    <span class="slot-icon">${icon(full ? "check" : tone === "backup" ? "user-plus" : "plus")}</span>
     <span>${escapeHtml(text)}${countLabel}</span>
   </button>`;
 }

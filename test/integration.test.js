@@ -153,7 +153,10 @@ test("public signup stores volunteers, keeps contact data private, and enforces 
   assert.match(html, /Grace/);
   assert.match(html, /Lin/);
   assert.match(html, /Reservehjælper \(ikke aktiv\)/);
+  assert.match(html, /Hjælpere fyldt 2\/2 - skriv dig som backup/);
+  assert.match(html, /data-role="HELPER_RESERVE"/);
   assert.doesNotMatch(html, /Reservechauffør \(ikke aktiv\)/);
+  assert.doesNotMatch(html, /Chauffør fyldt 1\/1 - skriv dig som backup/);
   assert.doesNotMatch(html, /11111111/);
   assert.doesNotMatch(html, /grace@example\.test/);
   assert.doesNotMatch(html, /22222222/);

@@ -54,6 +54,16 @@ test("publicEventPage exposes only public signup names and escapes user data", (
           },
           {
             id: "signup-2",
+            role: "HELPER",
+            slotNumber: 2,
+            firstName: "Grace",
+            lastName: "Hopper",
+            phone: "33333333",
+            email: "grace@example.test",
+            ownerKeyHash: "hash-2",
+          },
+          {
+            id: "signup-3",
             role: "HELPER_RESERVE",
             slotNumber: 1,
             firstName: "Lin",
@@ -71,12 +81,17 @@ test("publicEventPage exposes only public signup names and escapes user data", (
 
   assert.match(html, /Flagdag &lt;test&gt;/);
   assert.match(html, /Ada &lt;b&gt;/);
+  assert.match(html, /Grace/);
   assert.match(html, /Lin/);
   assert.match(html, /Reservehjælper \(ikke aktiv\)/);
+  assert.match(html, /Hjælpere fyldt 2\/2 - skriv dig som backup/);
+  assert.match(html, /data-role="HELPER_RESERVE"/);
   assert.doesNotMatch(html, /Lovelace/);
+  assert.doesNotMatch(html, /grace@example\.test/);
   assert.doesNotMatch(html, /lin@example\.test/);
   assert.doesNotMatch(html, /ada@example\.test/);
   assert.doesNotMatch(html, /12345678/);
+  assert.doesNotMatch(html, /33333333/);
   assert.doesNotMatch(html, /22222222/);
   assert.match(html, /Tak, din tilmelding er gemt/);
 });
