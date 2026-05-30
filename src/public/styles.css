@@ -1,20 +1,20 @@
 :root {
   color-scheme: light;
-  --bg: #f7f8f5;
+  --bg: #f3f7fb;
   --surface: #ffffff;
-  --surface-strong: #f0f4ef;
-  --text: #1f2a28;
-  --muted: #66706d;
-  --line: #d8ded8;
-  --primary: #256d5a;
-  --primary-dark: #174b40;
-  --accent: #2f6f9f;
-  --warning: #a45f15;
-  --danger: #a5352b;
-  --success-bg: #e7f6ed;
-  --error-bg: #fae8e5;
+  --surface-strong: #eaf2f8;
+  --text: #003255;
+  --muted: #667789;
+  --line: #c7d7e5;
+  --primary: #5f8cb4;
+  --primary-dark: #003255;
+  --accent: #d22832;
+  --warning: #9b5200;
+  --danger: #d22832;
+  --success-bg: #eef8e9;
+  --error-bg: #fdebed;
   --radius: 8px;
-  --shadow: 0 16px 40px rgb(31 42 40 / 0.08);
+  --shadow: 0 16px 40px rgb(0 50 85 / 0.1);
 }
 
 * {
@@ -30,7 +30,7 @@ body {
   margin: 0;
   color: var(--text);
   font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    "Work Sans", Arial, Helvetica, ui-sans-serif, system-ui, sans-serif;
   font-size: 17px;
   line-height: 1.5;
 }
@@ -50,7 +50,7 @@ code {
   padding: 0.12rem 0.35rem;
   border: 1px solid var(--line);
   border-radius: 5px;
-  background: #f4f6f4;
+  background: #eef4f8;
   font-size: 0.94em;
 }
 
@@ -64,8 +64,8 @@ code {
   gap: 1rem;
   min-height: 68px;
   padding: 0.75rem clamp(1rem, 4vw, 2rem);
-  border-bottom: 1px solid var(--line);
-  background: rgb(247 248 245 / 0.94);
+  border-bottom: 4px solid var(--accent);
+  background: rgb(0 50 85 / 0.96);
   backdrop-filter: blur(12px);
 }
 
@@ -73,7 +73,7 @@ code {
   display: inline-flex;
   align-items: center;
   gap: 0.65rem;
-  color: var(--text);
+  color: #ffffff;
   font-weight: 800;
   text-decoration: none;
 }
@@ -84,10 +84,26 @@ code {
   justify-content: center;
   width: 30px;
   height: 30px;
-  border: 2px solid var(--primary);
+  border: 2px solid #ffffff;
   border-radius: 6px;
   background: var(--primary);
   color: #ffffff;
+}
+
+.topbar a,
+.nav-link {
+  color: #ffffff;
+}
+
+.nav-link {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
 }
 
 .nav {
@@ -100,7 +116,7 @@ code {
 .user {
   max-width: 34vw;
   overflow: hidden;
-  color: var(--muted);
+  color: rgb(255 255 255 / 0.78);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -221,16 +237,17 @@ h3 {
   justify-content: center;
   gap: 0.45rem;
   padding: 0.8rem 1rem;
-  border: 1px solid var(--primary);
+  border: 1px solid var(--primary-dark);
   border-radius: 7px;
-  background: var(--primary);
+  background: var(--primary-dark);
   color: #ffffff;
   text-decoration: none;
   white-space: nowrap;
 }
 
 .button:hover {
-  background: var(--primary-dark);
+  border-color: var(--primary);
+  background: var(--primary);
 }
 
 .button.secondary {
@@ -383,14 +400,14 @@ input {
   width: 100%;
   min-height: 48px;
   padding: 0.72rem 0.8rem;
-  border: 1px solid #bdc8c1;
+  border: 1px solid #aebfd0;
   border-radius: 7px;
   background: #ffffff;
   color: var(--text);
 }
 
 input:focus {
-  outline: 3px solid rgb(47 111 159 / 0.24);
+  outline: 3px solid rgb(95 140 180 / 0.28);
   outline-offset: 1px;
   border-color: var(--accent);
 }
@@ -465,15 +482,15 @@ fieldset {
 }
 
 .notice.success {
-  border-color: #a9d8bb;
+  border-color: #bde2ac;
   background: var(--success-bg);
-  color: #245d38;
+  color: #315f22;
 }
 
 .notice.error {
-  border-color: #e7b4ad;
+  border-color: #efb8bd;
   background: var(--error-bg);
-  color: #7d2d25;
+  color: #8d1d25;
 }
 
 .auth-options,
@@ -522,7 +539,7 @@ fieldset {
   border: 0;
   border-radius: var(--radius);
   background: transparent;
-  box-shadow: 0 14px 34px rgb(31 42 40 / 0.07);
+  box-shadow: 0 14px 34px rgb(0 50 85 / 0.09);
 }
 
 .day-block > h2 {
@@ -564,10 +581,10 @@ fieldset {
 
 .day-trips {
   padding: 0.85rem;
-  border: 1px solid #c6d3cc;
+  border: 1px solid var(--line);
   border-top: 0;
   border-radius: 0 0 var(--radius) var(--radius);
-  background: #edf3ef;
+  background: #e9f2f8;
 }
 
 .day-number {
@@ -607,7 +624,7 @@ fieldset {
 }
 
 .public-day-block .trip-card {
-  border-color: #d1dad4;
+  border-color: #d5e0ea;
   box-shadow: none;
 }
 
@@ -630,12 +647,12 @@ fieldset {
 }
 
 .pill.open {
-  background: #e7f6ed;
-  color: #245d38;
+  background: #eef8e9;
+  color: #315f22;
 }
 
 .pill.almost {
-  background: #fff1dd;
+  background: #fff4d6;
   color: var(--warning);
 }
 
@@ -659,7 +676,7 @@ fieldset {
   width: 100%;
   min-height: 46px;
   padding: 0.55rem 0.7rem;
-  border: 1px solid #b7c5bd;
+  border: 1px solid #b4c8da;
   border-radius: 7px;
   appearance: none;
   background: #ffffff;
@@ -674,12 +691,12 @@ fieldset {
 
 .slot-button:hover {
   border-color: var(--primary);
-  background: #eef8f3;
+  background: #eef5fa;
   box-shadow: inset 0 0 0 1px var(--primary);
 }
 
 .slot-button:focus-visible {
-  outline: 3px solid rgb(47 111 159 / 0.24);
+  outline: 3px solid rgb(95 140 180 / 0.28);
   outline-offset: 2px;
 }
 
@@ -690,7 +707,7 @@ fieldset {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #e5f3ec;
+  background: #e4eef7;
   color: var(--primary);
   flex: 0 0 22px;
 }
@@ -707,26 +724,26 @@ fieldset {
 }
 
 .slot-button.backup {
-  border-color: #d4b46a;
-  background: #fff8e8;
-  color: #7a4c00;
+  border-color: #ffb91e;
+  background: #fff4d1;
+  color: var(--primary-dark);
 }
 
 .slot-button.backup:hover {
-  border-color: #b88417;
-  background: #fff2cf;
-  box-shadow: inset 0 0 0 1px #b88417;
+  border-color: #d22832;
+  background: #ffe8ae;
+  box-shadow: inset 0 0 0 1px #d22832;
 }
 
 .slot-button.backup .slot-icon {
   background: #ffe8ae;
-  color: #8a5a00;
+  color: var(--accent);
 }
 
 .slot-button.full:hover,
 .slot-button:disabled:hover {
-  border-color: #d6ded8;
-  background: #f6f7f5;
+  border-color: #d7e2ec;
+  background: #f4f7fa;
   box-shadow: none;
 }
 
@@ -868,7 +885,7 @@ fieldset {
   display: grid;
   place-items: center;
   padding: 1rem;
-  background: rgb(31 42 40 / 0.48);
+  background: rgb(0 50 85 / 0.54);
 }
 
 .modal-backdrop[hidden] {
@@ -886,7 +903,7 @@ fieldset {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: var(--surface);
-  box-shadow: 0 24px 70px rgb(31 42 40 / 0.28);
+  box-shadow: 0 24px 70px rgb(0 50 85 / 0.28);
 }
 
 .modal-close {
