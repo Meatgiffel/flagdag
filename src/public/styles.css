@@ -964,6 +964,7 @@ fieldset {
   }
 
   .two-cols,
+  .slots,
   .date-tools,
   .date-tools:has(label:nth-of-type(2)) {
     grid-template-columns: 1fr;

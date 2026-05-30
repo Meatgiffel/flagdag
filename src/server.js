@@ -24,7 +24,7 @@ import {
   publicEventPage,
   setupAuthPage,
 } from "./lib/render.js";
-import { ROLE_LIMITS, publicOrigin, sortTrips } from "./lib/format.js";
+import { ROLE_LABELS, ROLE_LIMITS, publicOrigin, sortTrips } from "./lib/format.js";
 import { generateUniquePublicCode } from "./lib/public-code.js";
 import {
   eventFormSchema,
@@ -477,9 +477,28 @@ class SignupCapacityError extends Error {}
 
 async function reserveSignupSlot(tx, data) {
   const limit = ROLE_LIMITS[data.role];
-  if (!limit) throw new SignupCapacityError("Vælg enten chauffør eller hjælper.");
+  const reserveForRole = reserveRoleTarget(data.role);
 
-  for (let slotNumber = 1; slotNumber <= limit; slotNumber += 1) {
+  if (!limit && !reserveForRole) {
+    throw new SignupCapacityError("Vælg enten chauffør, hjælper eller reserve.");
+  }
+
+  if (reserveForRole) {
+    const activeCount = await tx.signup.count({
+      where: {
+        tripId: data.tripId,
+        role: reserveForRole,
+      },
+    });
+
+    if (activeCount < ROLE_LIMITS[reserveForRole]) {
+      throw new SignupCapacityError(`${ROLE_LABELS[data.role]} er først mulig, når ${ROLE_LABELS[reserveForRole].toLowerCase()} er fyldt.`);
+    }
+  }
+
+  const slotLimit = limit ?? 1000;
+
+  for (let slotNumber = 1; slotNumber <= slotLimit; slotNumber += 1) {
     try {
       await tx.signup.create({
         data: {
@@ -493,11 +512,17 @@ async function reserveSignupSlot(tx, data) {
     }
   }
 
-  throw new SignupCapacityError("Den valgte rolle er allerede fyldt på en af turene.");
+  throw new SignupCapacityError(`${ROLE_LABELS[data.role] ?? "Den valgte rolle"} er allerede fyldt på en af turene.`);
 }
 
 function hashOwnerKey(ownerKey) {
   return createHash("sha256").update(ownerKey).digest("hex");
+}
+
+function reserveRoleTarget(role) {
+  if (role === "DRIVER_RESERVE") return "DRIVER";
+  if (role === "HELPER_RESERVE") return "HELPER";
+  return null;
 }
 
 function isDirectRun() {

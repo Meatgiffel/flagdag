@@ -332,6 +332,8 @@ function adminTripCard(trip) {
     <div class="slots">
       <span>Chauffør ${counts.DRIVER}/${ROLE_LIMITS.DRIVER}</span>
       <span>Hjælpere ${counts.HELPER}/${ROLE_LIMITS.HELPER}</span>
+      <span>Reservechauffører ${counts.DRIVER_RESERVE}</span>
+      <span>Reservehjælpere ${counts.HELPER_RESERVE}</span>
     </div>
     <ul class="signup-list">${signups}</ul>
   </article>`;
@@ -359,7 +361,7 @@ export function publicEventPage({ event, req, error = "", success = false, remov
         <div class="event-title">
           <p class="eyebrow">Flagplan</p>
           <h1>${escapeHtml(event.title)}</h1>
-          <p>Klik på en ledig plads på en tur for at melde dig.</p>
+          <p>Klik på en tur for at melde dig. Når en rolle er fyldt, kan du skrive dig på som reserve.</p>
         </div>
         ${success ? `<div class="notice success">Tak, din tilmelding er gemt.</div>` : ""}
         ${removed ? `<div class="notice success">Din tilmelding er fjernet.</div>` : ""}
@@ -423,8 +425,8 @@ function publicTripCard(trip) {
       ${statusPill(trip)}
     </div>
     <div class="slots">
-      ${slotButton({ trip, role: "DRIVER", text: "Chauffør", count: counts.DRIVER, limit: ROLE_LIMITS.DRIVER, label })}
-      ${slotButton({ trip, role: "HELPER", text: "Hjælpere", count: counts.HELPER, limit: ROLE_LIMITS.HELPER, label })}
+      ${activeSlotButton({ trip, role: "DRIVER", text: "Chauffør", count: counts.DRIVER, reserveCount: counts.DRIVER_RESERVE, limit: ROLE_LIMITS.DRIVER, label })}
+      ${activeSlotButton({ trip, role: "HELPER", text: "Hjælpere", count: counts.HELPER, reserveCount: counts.HELPER_RESERVE, limit: ROLE_LIMITS.HELPER, label })}
     </div>
     <ul class="public-names">${publicNames}</ul>
   </article>`;
@@ -435,8 +437,19 @@ function capitalize(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-function slotButton({ trip, role, text, count, limit, label }) {
+function activeSlotButton({ trip, role, text, count, reserveCount, limit, label }) {
   const full = count >= limit;
+  if (!full) return slotButton({ trip, role, text, count, limit, label });
+
+  const reserveRole = role === "DRIVER" ? "DRIVER_RESERVE" : "HELPER_RESERVE";
+  const reserveText = role === "DRIVER" ? "Reservechauffør (ikke aktiv)" : "Reservehjælper (ikke aktiv)";
+  return `${slotButton({ trip, role, text, count, limit, label })}
+      ${slotButton({ trip, role: reserveRole, text: reserveText, count: reserveCount, limit: null, label })}`;
+}
+
+function slotButton({ trip, role, text, count, limit, label }) {
+  const full = limit !== null && count >= limit;
+  const countLabel = limit === null ? "" : ` ${count}/${limit}`;
   return `<button
     class="slot-button ${full ? "full" : ""}"
     type="button"
@@ -449,7 +462,7 @@ function slotButton({ trip, role, text, count, limit, label }) {
     aria-label="Meld dig som ${escapeHtml(text.toLowerCase())} på ${escapeHtml(label)}"
   >
     <span class="slot-icon">${icon(full ? "check" : "plus")}</span>
-    <span>${escapeHtml(text)} ${count}/${limit}</span>
+    <span>${escapeHtml(text)}${countLabel}</span>
   </button>`;
 }
 
@@ -461,8 +474,8 @@ function statusPill(trip) {
 function signupModal({ event, values, error }) {
   const selectedTripId = Array.isArray(values.tripIds) ? values.tripIds[0] : values.tripIds;
   const selectedTrip = event.trips.find((trip) => trip.id === selectedTripId);
-  const role = values.role === "DRIVER" ? "DRIVER" : "HELPER";
-  const roleLabel = role === "DRIVER" ? "Chauffør" : "Hjælper";
+  const role = ["DRIVER", "HELPER", "DRIVER_RESERVE", "HELPER_RESERVE"].includes(values.role) ? values.role : "HELPER";
+  const roleLabel = ROLE_LABELS[role] ?? "Hjælper";
   const tripLabel = selectedTrip ? modalTripLabel(selectedTrip) : "Valgt tur";
 
   return `<div class="modal-backdrop" id="signupModal" ${error ? "" : "hidden"}>

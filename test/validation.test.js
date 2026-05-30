@@ -57,6 +57,30 @@ test("signupSchema requires a contact method and keeps simple valid signups", ()
   assert.equal(parsed.data.email, "");
 });
 
+test("signupSchema accepts role-specific reserve signups", () => {
+  for (const role of ["DRIVER_RESERVE", "HELPER_RESERVE"]) {
+    const parsed = signupSchema.safeParse({
+      firstName: "Ada",
+      phone: "12345678",
+      role,
+      tripIds: ["trip-1"],
+    });
+
+    assert.equal(parsed.success, true);
+  }
+});
+
+test("signupSchema rejects generic reserve signups", () => {
+  const parsed = signupSchema.safeParse({
+    firstName: "Ada",
+    phone: "12345678",
+    role: "RESERVE",
+    tripIds: ["trip-1"],
+  });
+
+  assert.equal(parsed.success, false);
+});
+
 test("signupSchema rejects empty contact details and filled honeypot", () => {
   assert.equal(
     signupSchema.safeParse({

@@ -6,6 +6,8 @@ export const ROLE_LIMITS = {
 export const ROLE_LABELS = {
   DRIVER: "Chauffør",
   HELPER: "Hjælper",
+  DRIVER_RESERVE: "Reservechauffør (ikke aktiv)",
+  HELPER_RESERVE: "Reservehjælper (ikke aktiv)",
 };
 
 export const KIND_LABELS = {
@@ -70,7 +72,7 @@ export function groupedTrips(trips) {
 }
 
 export function tripCounts(trip) {
-  const counts = { DRIVER: 0, HELPER: 0 };
+  const counts = { DRIVER: 0, HELPER: 0, DRIVER_RESERVE: 0, HELPER_RESERVE: 0 };
   for (const signup of trip.signups ?? []) {
     if (counts[signup.role] !== undefined) counts[signup.role] += 1;
   }
